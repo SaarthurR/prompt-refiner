@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-NONCE_PLACEHOLDER';"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1915;
+      color: #e8e0d5;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 13px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    #pr-header {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #2e2c28;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-shrink: 0;
+    }
+    #pr-logo {
+      width: 26px; height: 26px;
+      background: linear-gradient(135deg, #d4a574, #c4956a);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    #pr-logo svg { width: 14px; height: 14px; fill: white; }
+    #pr-title { font-size: 13.5px; font-weight: 600; color: #e8e0d5; }
+    #pr-subtitle { font-size: 10.5px; color: #6b5e52; margin-top: 1px; }
+
+    /* ── Model row ── */
+    #pr-model-row {
+      padding: 10px 16px;
+      border-bottom: 1px solid #2e2c28;
+      flex-shrink: 0;
+    }
+    .pr-field-label {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #6b5e52;
+      margin-bottom: 7px;
+    }
+    #pr-model-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .pr-model-pill {
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      cursor: pointer;
+      border: 1px solid #3a3630;
+      background: #222019;
+      color: #8a7d6e;
+      transition: all .15s;
+      font-family: Georgia, serif;
+      white-space: nowrap;
+    }
+    .pr-model-pill:hover   { border-color: #d4a574; color: #d4a574; }
+    .pr-model-pill.active  {
+      background: linear-gradient(135deg, #d4a574, #c4956a);
+      border-color: transparent;
+      color: white;
+      font-weight: 500;
+    }
+
+    /* ── Scrollable body ── */
+    #pr-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+    #pr-body::-webkit-scrollbar        { width: 3px; }
+    #pr-body::-webkit-scrollbar-track  { background: transparent; }
+    #pr-body::-webkit-scrollbar-thumb  { background: #3a3630; border-radius: 2px; }
+
+    /* ── Use selection button ── */
+    #pr-use-selection {
+      width: 100%;
+      padding: 7px 10px;
+      background: #222019;
+      border: 1px dashed #3a3630;
+      border-radius: 8px;
+      color: #8a7d6e;
+      font-size: 11.5px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    #pr-use-selection:hover { border-color: #d4a574; color: #d4a574; }
+
+    /* ── Inputs ── */
+    #pr-input {
+      width: 100%;
+      min-height: 110px;
+      background: #222019;
+      border: 1px solid #3a3630;
+      border-radius: 9px;
+      color: #e8e0d5;
+      font-size: 13px;
+      line-height: 1.55;
+      padding: 10px 12px;
+      resize: vertical;
+      font-family: Georgia, serif;
+      transition: border-color .15s;
+    }
+    #pr-input:focus         { outline: none; border-color: #d4a574; }
+    #pr-input::placeholder  { color: #4a4038; }
+
+    /* ── Refine button ── */
+    #pr-refine-btn {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #d4a574 0%, #c4956a 100%);
+      border: none;
+      border-radius: 9px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    #pr-refine-btn:hover:not(:disabled) {
+      opacity: .92;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(212,165,116,.3);
+    }
+    #pr-refine-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    /* ── Status ── */
+    #pr-status {
+      font-size: 11.5px;
+      color: #8a7d6e;
+      text-align: center;
+      min-height: 16px;
+      font-style: italic;
+    }
+    #pr-status.error   { color: #c47070; }
+    #pr-status.success { color: #6aaa8a; }
+
+    /* ── Output ── */
+    #pr-output-box {
+      background: #222019;
+      border: 1px solid #3a3630;
+      border-radius: 9px;
+      min-height: 110px;
+      padding: 10px 12px;
+      color: #e8e0d5;
+      font-size: 13px;
+      line-height: 1.55;
+      font-family: Georgia, serif;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    #pr-output-box.placeholder { color: #4a4038; font-style: italic; }
+
+    #pr-output-actions {
+      display: flex;
+      gap: 7px;
+    }
+    .pr-action-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: 1px solid #3a3630;
+      background: #222019;
+      color: #a89880;
+      font-size: 11.5px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .pr-action-btn:hover       { border-color: #d4a574; color: #d4a574; background: #2a2520; }
+    .pr-action-btn.success     { border-color: #6aaa8a; color: #6aaa8a; }
+    #pr-insert-btn             { flex: 1.4; }
+
+    /* ── Footer / API key ── */
+    #pr-footer {
+      padding: 10px 16px;
+      border-top: 1px solid #2e2c28;
+      flex-shrink: 0;
+    }
+    #pr-key-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #pr-key-label {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #6b5e52;
+      white-space: nowrap;
+    }
+    #pr-key-status {
+      font-size: 10.5px;
+      flex: 1;
+      font-style: italic;
+    }
+    #pr-key-status.set   { color: #6aaa8a; }
+    #pr-key-status.unset { color: #c47070; }
+    #pr-key-toggle {
+      font-size: 10.5px;
+      background: none;
+      border: 1px solid #3a3630;
+      border-radius: 5px;
+      color: #6b5e52;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      white-space: nowrap;
+      transition: all .15s;
+    }
+    #pr-key-toggle:hover { border-color: #d4a574; color: #d4a574; }
+
+    #pr-key-edit {
+      margin-top: 8px;
+      display: none;
+      gap: 6px;
+      align-items: center;
+    }
+    #pr-key-edit.visible { display: flex; }
+    #pr-api-key-input {
+      flex: 1;
+      background: #222019;
+      border: 1px solid #3a3630;
+      border-radius: 6px;
+      color: #a89880;
+      font-size: 11.5px;
+      padding: 5px 8px;
+      font-family: monospace;
+      transition: border-color .15s;
+    }
+    #pr-api-key-input:focus { outline: none; border-color: #d4a574; }
+    #pr-api-save {
+      padding: 5px 10px;
+      background: #2e2c28;
+      border: 1px solid #3a3630;
+      border-radius: 6px;
+      color: #a89880;
+      font-size: 11.5px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    #pr-api-save:hover { border-color: #d4a574; color: #d4a574; }
+
+    /* ── Loader dots ── */
+    .pr-dots { display: inline-flex; gap: 4px; }
+    .pr-dots span {
+      width: 4px; height: 4px;
+      background: white;
+      border-radius: 50%;
+      animation: pr-bounce 1.2s ease-in-out infinite;
+    }
+    .pr-dots span:nth-child(2) { animation-delay: .2s; }
+    .pr-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes pr-bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: .5; }
+      40%           { transform: translateY(-4px); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div id="pr-header">
+    <div id="pr-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    </div>
+    <div>
+      <div id="pr-title">Prompt Refiner</div>
+      <div id="pr-subtitle">Groq · Llama 3.3 · 8 models</div>
+    </div>
+  </div>
+
+  <!-- Model selector -->
+  <div id="pr-model-row">
+    <div class="pr-field-label">Target Model</div>
+    <div id="pr-model-pills">
+      <button class="pr-model-pill active" data-model="ChatGPT">ChatGPT</button>
+      <button class="pr-model-pill" data-model="Claude">Claude</button>
+      <button class="pr-model-pill" data-model="Gemini">Gemini</button>
+      <button class="pr-model-pill" data-model="Grok">Grok</button>
+      <button class="pr-model-pill" data-model="Perplexity">Perplexity</button>
+      <button class="pr-model-pill" data-model="DeepSeek">DeepSeek</button>
+      <button class="pr-model-pill" data-model="Codex">Codex</button>
+      <button class="pr-model-pill" data-model="Claude Code">Claude Code</button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div id="pr-body">
+
+    <!-- Pull from active editor -->
+    <button id="pr-use-selection">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      Use Editor Selection
+    </button>
+
+    <!-- Draft input -->
+    <div>
+      <div class="pr-field-label">Your Draft Prompt</div>
+      <textarea id="pr-input" placeholder="Paste your prompt here — rough, unstructured, however it is…"></textarea>
+    </div>
+
+    <!-- Refine button -->
+    <button id="pr-refine-btn" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      Refine Prompt
+    </button>
+
+    <!-- Status -->
+    <div id="pr-status"></div>
+
+    <!-- Output -->
+    <div>
+      <div class="pr-field-label">Refined Prompt</div>
+      <div id="pr-output-box" class="placeholder">Your refined prompt will appear here…</div>
+      <div id="pr-output-actions" style="display:none; margin-top:8px;">
+        <button class="pr-action-btn" id="pr-copy-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy
+        </button>
+        <button class="pr-action-btn" id="pr-insert-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 10 4 15 9 20"/>
+            <path d="M20 4v7a4 4 0 0 1-4 4H4"/>
+          </svg>
+          Insert to Editor
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer: API key -->
+  <div id="pr-footer">
+    <div id="pr-key-row">
+      <span id="pr-key-label">Groq Key</span>
+      <span id="pr-key-status" class="unset">Not set</span>
+      <button id="pr-key-toggle">Change</button>
+    </div>
+    <div id="pr-key-edit">
+      <input id="pr-api-key-input" type="password" placeholder="gsk_…" autocomplete="off"/>
+      <button id="pr-api-save">Save</button>
+    </div>
+  </div>
+
+  <script nonce="NONCE_PLACEHOLDER">
+    const vscode = acquireVsCodeApi();
+
+    let selectedModel = 'ChatGPT';
+    let refinedText   = '';
+
+    // ── Model pills ──────────────────────────────────────────────────────
+    document.querySelectorAll('.pr-model-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.pr-model-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        selectedModel = pill.dataset.model;
+      });
+    });
+
+    // ── Input gating ─────────────────────────────────────────────────────
+    const inputEl   = document.getElementById('pr-input');
+    const refineBtn = document.getElementById('pr-refine-btn');
+    inputEl.addEventListener('input', () => {
+      refineBtn.disabled = inputEl.value.trim().length === 0;
+    });
+
+    // ── Use editor selection ──────────────────────────────────────────────
+    document.getElementById('pr-use-selection').addEventListener('click', () => {
+      vscode.postMessage({ command: 'getSelection' });
+    });
+
+    // ── Refine ────────────────────────────────────────────────────────────
+    refineBtn.addEventListener('click', () => {
+      const userPrompt = inputEl.value.trim();
+      if (!userPrompt) return;
+
+      refineBtn.disabled = true;
+      refineBtn.innerHTML = '<span class="pr-dots"><span></span><span></span><span></span></span> Refining…';
+      setStatus('Optimizing for ' + selectedModel + '…', '');
+      document.getElementById('pr-output-box').textContent = 'Thinking…';
+      document.getElementById('pr-output-box').className = 'placeholder';
+      document.getElementById('pr-output-actions').style.display = 'none';
+
+      vscode.postMessage({ command: 'refine', model: selectedModel, userPrompt });
+    });
+
+    function resetRefineBtn() {
+      refineBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Refine Prompt';
+      refineBtn.disabled = inputEl.value.trim().length === 0;
+    }
+
+    function setStatus(msg, cls) {
+      const el = document.getElementById('pr-status');
+      el.textContent = msg;
+      el.className = cls;
+    }
+
+    // ── Copy ──────────────────────────────────────────────────────────────
+    document.getElementById('pr-copy-btn').addEventListener('click', () => {
+      if (!refinedText) return;
+      navigator.clipboard.writeText(refinedText).then(() => {
+        const btn = document.getElementById('pr-copy-btn');
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('success');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+          btn.classList.remove('success');
+        }, 2000);
+      });
+    });
+
+    // ── Insert to editor ─────────────────────────────────────────────────
+    document.getElementById('pr-insert-btn').addEventListener('click', () => {
+      if (!refinedText) return;
+      vscode.postMessage({ command: 'insertToEditor', text: refinedText });
+      setStatus('✓ Inserted into editor!', 'success');
+    });
+
+    // ── API key UI ────────────────────────────────────────────────────────
+    let keyEditVisible = false;
+
+    document.getElementById('pr-key-toggle').addEventListener('click', () => {
+      keyEditVisible = !keyEditVisible;
+      const editEl = document.getElementById('pr-key-edit');
+      if (keyEditVisible) {
+        editEl.classList.add('visible');
+        document.getElementById('pr-api-key-input').focus();
+        document.getElementById('pr-key-toggle').textContent = 'Cancel';
+      } else {
+        editEl.classList.remove('visible');
+        document.getElementById('pr-key-toggle').textContent = 'Change';
+      }
+    });
+
+    document.getElementById('pr-api-save').addEventListener('click', () => {
+      const key = document.getElementById('pr-api-key-input').value.trim();
+      if (!key) return;
+      vscode.postMessage({ command: 'saveKey', key });
+      document.getElementById('pr-api-key-input').value = '';
+    });
+
+    // ── Messages from extension ───────────────────────────────────────────
+    window.addEventListener('message', e => {
+      const msg = e.data;
+      switch (msg.command) {
+
+        case 'keyStatus': {
+          const statusEl = document.getElementById('pr-key-status');
+          if (msg.hasKey) {
+            statusEl.textContent = '✓ Saved';
+            statusEl.className = 'set';
+          } else {
+            statusEl.textContent = 'Not set';
+            statusEl.className = 'unset';
+          }
+          break;
+        }
+
+        case 'keySaved': {
+          setStatus('✓ API key saved.', 'success');
+          document.getElementById('pr-key-edit').classList.remove('visible');
+          document.getElementById('pr-key-toggle').textContent = 'Change';
+          keyEditVisible = false;
+          setTimeout(() => setStatus('', ''), 2500);
+          break;
+        }
+
+        case 'selectionLoaded':
+          if (msg.text) {
+            inputEl.value = msg.text;
+            inputEl.dispatchEvent(new Event('input'));
+          }
+          break;
+
+        case 'refined':
+          refinedText = msg.result;
+          document.getElementById('pr-output-box').textContent = refinedText;
+          document.getElementById('pr-output-box').className = '';
+          document.getElementById('pr-output-actions').style.display = 'flex';
+          setStatus('✓ Refined for ' + selectedModel, 'success');
+          resetRefineBtn();
+          break;
+
+        case 'error':
+          document.getElementById('pr-output-box').textContent = msg.error;
+          document.getElementById('pr-output-box').className = 'placeholder';
+          setStatus(msg.error, 'error');
+          resetRefineBtn();
+          break;
+      }
+    });
+
+    // Tell extension we're ready
+    vscode.postMessage({ command: 'ready' });
+  </script>
+</body>
+</html>

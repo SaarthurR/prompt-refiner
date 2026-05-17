@@ -1,0 +1,55 @@
+{
+  "name": "prompt-refiner",
+  "displayName": "Prompt Refiner",
+  "description": "Refine AI prompts for ChatGPT, Claude, Gemini, Grok, Perplexity, DeepSeek, Codex, and Claude Code — using 2025 model-specific best practices. Powered by Groq.",
+  "version": "2.0.0",
+  "publisher": "saarth-ranka",
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["prompt", "ai", "chatgpt", "claude", "gemini", "refiner", "llm"],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "promptRefiner",
+          "title": "Prompt Refiner",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "promptRefiner": [
+        {
+          "type": "webview",
+          "id": "promptRefiner.sidebarView",
+          "name": "Prompt Refiner"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "promptRefiner.refineSelection",
+        "title": "Prompt Refiner: Refine Selected Text"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "promptRefiner.refineSelection",
+        "key": "ctrl+shift+alt+r",
+        "mac": "cmd+shift+alt+r",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.0.0"
+  },
+  "scripts": {
+    "package": "vsce package"
+  }
+}
