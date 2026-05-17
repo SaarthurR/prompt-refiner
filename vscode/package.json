@@ -4,7 +4,10 @@
   "description": "Refine AI prompts for ChatGPT, Claude, Gemini, Grok, Perplexity, DeepSeek, Codex, and Claude Code — using 2025 model-specific best practices. Powered by Groq.",
   "version": "2.0.0",
   "publisher": "saarth-ranka",
-  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SaarthurR/prompt-refiner"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
